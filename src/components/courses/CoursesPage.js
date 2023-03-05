@@ -2,6 +2,8 @@ import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as courseActions from "../../redux/actions/courseActions";
+import CourseList from "./CourseList";
+import * as authorActions from "../../redux/actions/authorActions";
 
 class CoursesPage extends React.Component {
   state = {
@@ -22,26 +24,22 @@ class CoursesPage extends React.Component {
     this.props.actions.createCourse(this.state.course); //with bindActionCreators
   };
 
+  componentDidMount() {
+    const { courses, authors, actions } = this.props;
+    if (courses.length === 0) {
+      actions.loadCourses().catch((e) => alert("loading courses failed: " + e));
+    }
+
+    if (authors.length === 0) {
+      actions.loadAuthors().catch((e) => alert("loading authors failed: " + e));
+    }
+  }
+
   render() {
     return (
       <>
-        <form onSubmit={this.handleSubmit}>
-          <h2>Courses</h2>
-          <h3>Add Course</h3>
-
-          <input
-            type="text"
-            onChange={this.handleChange}
-            value={this.state.course.title}
-          />
-          <input type="submit" value="Save" />
-        </form>
-
-        {this.props.courses
-          ? this.props.courses.map((course) => (
-              <div key={course.title}>{course.title}</div>
-            ))
-          : null}
+        <h2>Courses</h2>
+        <CourseList courses={this.props.courses} />
       </>
     );
   }
@@ -50,7 +48,17 @@ class CoursesPage extends React.Component {
 // this page only needs access to courses
 const mapStateToProps = (state, ownProps) => {
   return {
-    courses: state.courses,
+    courses:
+      state.authors.length === 0
+        ? []
+        : state.courses.map((course) => {
+            return {
+              ...course,
+              authorName: state.authors.find((a) => a.id === course.authorId)
+                .name,
+            };
+          }),
+    authors: state.authors,
   };
 };
 
@@ -64,7 +72,10 @@ const mapStateToProps = (state, ownProps) => {
 // bindActionCreators
 const mapDispatchToProps = (dispatch) => {
   return {
-    actions: bindActionCreators(courseActions, dispatch), // automatically wraps all actions with dispatch and will give 1 actions prop
+    actions: {
+      loadCourses: bindActionCreators(courseActions.loadCourses, dispatch), // automatically wraps all actions with dispatch and will give 1 actions prop
+      loadAuthors: bindActionCreators(authorActions.loadAuthors, dispatch),
+    },
   };
 };
 
