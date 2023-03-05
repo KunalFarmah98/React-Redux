@@ -4,26 +4,12 @@ import { bindActionCreators } from "redux";
 import * as courseActions from "../../redux/actions/courseActions";
 import CourseList from "./CourseList";
 import * as authorActions from "../../redux/actions/authorActions";
+import { Redirect } from "react-router-dom";
 
 class CoursesPage extends React.Component {
   state = {
-    course: {
-      title: "",
-    },
+    redirectToAddCoursePage: false,
   };
-
-  handleChange = (event) => {
-    const course = { ...this.state.course, title: event.target.value };
-    this.setState({ course });
-  };
-
-  handleSubmit = (event) => {
-    event.preventDefault();
-    // this.props.dispatch(courseActions.createCourse(this.state.course));  // no mapDispatchToProps
-    // this.props.createCourse(this.state.course); // with manual mapping of dispatch or with object passed as mapDispatchToProps
-    this.props.actions.createCourse(this.state.course); //with bindActionCreators
-  };
-
   componentDidMount() {
     const { courses, authors, actions } = this.props;
     if (courses.length === 0) {
@@ -38,7 +24,16 @@ class CoursesPage extends React.Component {
   render() {
     return (
       <>
+        {this.state.redirectToAddCoursePage && <Redirect to="/course" />}
         <h2>Courses</h2>
+        <button
+          style={{ marginBottom: 20 }}
+          className="btn btn-primary add-course"
+          onClick={() => this.setState({ redirectToAddCoursePage: true })}
+        >
+          {/*history is passed to all router objects */}
+          Add Course
+        </button>
         <CourseList courses={this.props.courses} />
       </>
     );
