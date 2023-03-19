@@ -40,6 +40,7 @@ const ManageCoursePage = ({
   const handleSubmit = (event) => {
     event.preventDefault;
     saveCourse(course).then(() => {
+      debugger;
       history.push("/courses"); // redirecting to courses list after adding a course
     });
   };
